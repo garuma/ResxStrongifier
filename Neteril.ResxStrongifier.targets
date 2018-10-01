@@ -34,6 +34,7 @@
             <ResxCode Include="@(EmbeddedResource)" Condition=" %(EmbeddedResource.Generator) == 'ResXFileCodeGenerator' Or %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">
                 <GeneratedOutput>%(RelativeDir)%(Filename).Strings$(DefaultLanguageSourceExtension)</GeneratedOutput>
                 <CanonicalRelativeDir>$([MSBuild]::ValueOrDefault('%(EmbeddedResource.RelativeDir)', '').TrimEnd('\'))</CanonicalRelativeDir>
+                <Public Condition=" %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">true</Public>
             </ResxCode>
         </ItemGroup>
     </Target>

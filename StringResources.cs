@@ -54,6 +54,8 @@ namespace NetFx
 				var resourcesTypeName = Path.GetFileNameWithoutExtension (resxFile);
 				var targetNamespace = resx.GetMetadata ("CustomToolNamespace");
 				var relativeDir = resx.GetMetadata ("CanonicalRelativeDir");
+				var makePublic = false;
+				bool.TryParse (resx.GetMetadata ("Public"), out makePublic);
 
 				if (string.IsNullOrEmpty (targetNamespace)) {
 					// Note that the custom tool namespace in newer versions of VS is saved
@@ -69,7 +71,7 @@ namespace NetFx
 				}
 
 				var rootArea = ResourceFile.Build (resxFile, DefaultClassName);
-				var generator = Generator.Create (Language, targetNamespace, resourcesTypeName, DefaultClassName, false, rootArea);
+				var generator = Generator.Create (Language, targetNamespace, resourcesTypeName, DefaultClassName, makePublic, rootArea);
 
 				var output = generator.TransformText ();
 				var targetFile = resx.GetMetadata("GeneratedOutput");
