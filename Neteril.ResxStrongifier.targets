@@ -10,6 +10,7 @@
         BeforeTargets="CoreCompile"
         Condition=" '$(GenerateStringResources)' == 'true' ">
         <ItemGroup>
+            <FileWrites Include="@(ResxCode->'%(GeneratedOutput)')" />
             <Compile Include="@(ResxCode->'%(GeneratedOutput)')" />
         </ItemGroup>
     </Target>
