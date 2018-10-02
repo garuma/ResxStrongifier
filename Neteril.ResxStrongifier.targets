@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <GenerateStringResources Condition=" '$(GenerateStringResources)' == '' ">true</GenerateStringResources>
+        <GeneratedStringResourcesPrefix Condition=" '$(GeneratedStringResourcesPrefix)' == '' ">generated-resx/</GeneratedStringResourcesPrefix>
     </PropertyGroup>
 
     <Target Name="_IncludeStrongifiedSource"
@@ -33,7 +34,7 @@
     <Target Name="_CollectResxCode">
         <ItemGroup>
             <ResxCode Include="@(EmbeddedResource)" Condition=" %(EmbeddedResource.Generator) == 'ResXFileCodeGenerator' Or %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">
-                <GeneratedOutput>%(RelativeDir)%(Filename).Strings$(DefaultLanguageSourceExtension)</GeneratedOutput>
+                <GeneratedOutput>$(GeneratedStringResourcesPrefix)%(RelativeDir)%(Filename).Strings$(DefaultLanguageSourceExtension)</GeneratedOutput>
                 <CanonicalRelativeDir>$([MSBuild]::ValueOrDefault('%(EmbeddedResource.RelativeDir)', '').TrimEnd('\'))</CanonicalRelativeDir>
                 <Public Condition=" %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">true</Public>
             </ResxCode>
