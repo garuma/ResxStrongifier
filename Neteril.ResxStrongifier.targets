@@ -49,7 +49,7 @@
     </Target>
 
     <Target Name="_GenerateStringResourcesFiles"
-        Inputs="@(ResxCode);$(MSBuildThisFileFullPath)"
+        Inputs="@(ResxCode);$(MSBuildThisFileFullPath);$(MSBuildProjectFullPath)"
         Outputs="@(ResxCode->'%(GeneratedOutput)')">
 
         <StringResources
