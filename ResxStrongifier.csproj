@@ -18,11 +18,15 @@
         <Content
             Include="Neteril.ResxStrongifier.props;Neteril.ResxStrongifier.targets"
             Pack="true"
-            PackagePath="build" />
+            PackagePath="build">
+            <Visible>false</Visible>
+        </Content>
         <Content
             Include="$(OutputPath)/ResxStrongifier.dll;$(OutputPath)/ResxStrongifier.pdb"
             Pack="true"
-            PackagePath="build" />
+            PackagePath="build">
+            <Visible>false</Visible>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
