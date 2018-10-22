@@ -6,6 +6,13 @@
         <GeneratedStringResourcesPrefix Condition=" '$(GeneratedStringResourcesPrefix)' == '' ">generated-resx/</GeneratedStringResourcesPrefix>
     </PropertyGroup>
 
+    <!-- VSMac does not excecute targets marked with 'BeforeTargets="CoreCompile"' when doing a design time build -->
+    <!-- If we want our stuff to show up in intellisense we need to use the 'old' mechanism of inserting into     -->
+    <!-- the CoreCompileDependsOn list. This should mean we are compatible with VS, VSMac and sdk style projects  -->
+    <PropertyGroup>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);_IncludeStrongifiedSource</CoreCompileDependsOn>
+    </PropertyGroup>
+
     <Target Name="_IncludeStrongifiedSource"
         DependsOnTargets="StrongifyResx"
         BeforeTargets="CoreCompile"
