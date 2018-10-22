@@ -70,8 +70,12 @@ namespace NetFx
 					Log.LogMessage (MessageImportance.Low, "Using provided CustomToolNamespace={0} metadata as TargetNamespace for {1}", targetNamespace, resx.ItemSpec);
 				}
 
-				var rootArea = ResourceFile.Build (resxFile, DefaultClassName);
-				var generator = Generator.Create (Language, targetNamespace, resourcesTypeName, DefaultClassName, makePublic, rootArea);
+				var targetClassName = resx.GetMetadata ("TargetClassName");
+				if (string.IsNullOrEmpty (targetClassName))
+					targetClassName = DefaultClassName;
+
+				var rootArea = ResourceFile.Build (resxFile, targetClassName);
+				var generator = Generator.Create (Language, targetNamespace, resourcesTypeName, targetClassName, makePublic, rootArea);
 
 				var output = generator.TransformText ();
 				var targetFile = resx.GetMetadata("GeneratedOutput");
