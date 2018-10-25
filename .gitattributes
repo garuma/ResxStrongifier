@@ -1,0 +1,4 @@
+*.cs text
+*.csproj text
+*.props text
+*.targets text
