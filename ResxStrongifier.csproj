@@ -15,16 +15,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content
-            Include="Neteril.ResxStrongifier.props;Neteril.ResxStrongifier.targets"
-            Pack="true"
-            PackagePath="build">
+        <Reference Include="System.Design" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Neteril.ResxStrongifier.props;Neteril.ResxStrongifier.targets" Pack="true" PackagePath="build">
             <Visible>false</Visible>
         </Content>
-        <Content
-            Include="$(OutputPath)/ResxStrongifier.dll;$(OutputPath)/ResxStrongifier.pdb"
-            Pack="true"
-            PackagePath="build">
+        <Content Include="$(OutputPath)/ResxStrongifier.dll;$(OutputPath)/ResxStrongifier.pdb" Pack="true" PackagePath="build">
             <Visible>false</Visible>
         </Content>
     </ItemGroup>

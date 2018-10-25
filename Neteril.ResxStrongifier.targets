@@ -1,5 +1,5 @@
 <Project>
-    <UsingTask TaskName="NetFx.StringResources" AssemblyFile="$(MSBuildThisFileDirectory)ResxStrongifier.dll" />
+    <UsingTask TaskName="NetFx.GenerateCombinedResources" AssemblyFile="$(MSBuildThisFileDirectory)ResxStrongifier.dll" />
 
     <PropertyGroup>
         <GenerateStringResources Condition=" '$(GenerateStringResources)' == '' ">true</GenerateStringResources>
@@ -10,49 +10,41 @@
     <!-- If we want our stuff to show up in intellisense we need to use the 'old' mechanism of inserting into     -->
     <!-- the CoreCompileDependsOn list. This should mean we are compatible with VS, VSMac and sdk style projects  -->
     <PropertyGroup>
-        <CoreCompileDependsOn>$(CoreCompileDependsOn);_IncludeStrongifiedSource</CoreCompileDependsOn>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);GenerateStringResources</CoreCompileDependsOn>
     </PropertyGroup>
 
-    <Target Name="_IncludeStrongifiedSource"
-        DependsOnTargets="StrongifyResx"
-        BeforeTargets="CoreCompile"
-        Condition=" '$(GenerateStringResources)' == 'true' ">
-        <ItemGroup>
-            <FileWrites Include="@(ResxCode->'%(GeneratedOutput)')" />
-            <Compile Include="@(ResxCode->'%(GeneratedOutput)')" />
-        </ItemGroup>
-    </Target>
-
     <Target Name="_IncludeStrongifiedSourceInXamlBuild"
-        DependsOnTargets="StrongifyResx"
-        BeforeTargets="GenerateTemporaryTargetAssembly"
-        Condition=" '$(GenerateStringResources)' == 'true' ">
+        DependsOnTargets="GenerateStringResources"
+        BeforeTargets="GenerateTemporaryTargetAssembly">
         <ItemGroup>
             <_GeneratedCodeFiles Include="@(ResxCode->'%(GeneratedOutput)')" />
         </ItemGroup>
     </Target>
 
     <!-- Compatibility targets with netfx-StringResources -->
-    <Target Name="GenerateStringResources" DependsOnTargets="StrongifyResx" Condition=" '$(GenerateStringResources)' == 'true' " />
-
-    <Target Name="StrongifyResx"
-        DependsOnTargets="_CollectResxCode;_GenerateStringResourcesFiles" Condition=" '$(GenerateStringResources)' == 'true' " />
+    <Target Name="GenerateStringResources" DependsOnTargets="_CollectResxCode;_GenerateCombinedResources">
+        <ItemGroup>
+            <Compile Include="@(ResxCode->'%(GeneratedOutput)')" />
+            <FileWrites Include="@(ResxCode->'%(GeneratedOutput)')" />
+        </ItemGroup>
+    </Target>
 
     <Target Name="_CollectResxCode">
         <ItemGroup>
-            <ResxCode Include="@(EmbeddedResource)" Condition=" %(EmbeddedResource.Generator) == 'ResXFileCodeGenerator' Or %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">
-                <GeneratedOutput>$(GeneratedStringResourcesPrefix)%(RelativeDir)%(Filename).Strings$(DefaultLanguageSourceExtension)</GeneratedOutput>
+            <ResxCode Include="@(EmbeddedResource)" Condition=" %(EmbeddedResource.Generator) == 'MSBuild:GenerateStringResources' ">
                 <CanonicalRelativeDir>$([MSBuild]::ValueOrDefault('%(EmbeddedResource.RelativeDir)', '').TrimEnd('\'))</CanonicalRelativeDir>
-                <Public Condition=" %(EmbeddedResource.Generator) == 'PublicResXFileCodeGenerator' ">true</Public>
+                <GenerateStringResources>$(GenerateStringResources)</GenerateStringResources>
+                <GeneratedOutput Condition=" '%(EmbeddedResource.GeneratedOutput)' == '' ">$(GeneratedStringResourcesPrefix)%(RelativeDir)%(Filename).Designer$(DefaultLanguageSourceExtension)</GeneratedOutput>
+                <Public Condition="'%(EmbeddedResource.Public)' == '' ">false</Public>
             </ResxCode>
         </ItemGroup>
     </Target>
 
-    <Target Name="_GenerateStringResourcesFiles"
-        Inputs="@(ResxCode);$(MSBuildThisFileFullPath);$(MSBuildProjectFullPath)"
-        Outputs="@(ResxCode->'%(GeneratedOutput)')">
+    <Target Name="_GenerateCombinedResources"
+        Inputs="%(ResxCode.Identity);$(MSBuildThisFileFullPath);$(MSBuildProjectFullPath)"
+        Outputs="%(ResxCode.GeneratedOutput)">
 
-        <StringResources
+        <GenerateCombinedResources
             RootNamespace="$(RootNamespace)"
             Language="$(Language)"
             ResxFiles="@(ResxCode)" />
