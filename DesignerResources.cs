@@ -18,6 +18,7 @@ namespace NetFx
 			// Same logic as ResXFileCodeGenerator.
 			var resourcesTypeName = Path.GetFileNameWithoutExtension (resxFile);
 			var targetNamespace = resx.GetMetadata ("CustomToolNamespace");
+			var resourceName = resx.GetMetadata ("ManifestResourceName");;
 			var relativeDir = resx.GetMetadata ("CanonicalRelativeDir");
 			var makePublic = false;
 			bool.TryParse (resx.GetMetadata ("Public"), out makePublic);
@@ -35,12 +36,16 @@ namespace NetFx
 				log.LogMessage (MessageImportance.Low, "Using provided CustomToolNamespace={0} metadata as TargetNamespace for {1}", targetNamespace, resx.ItemSpec);
 			}
 
+			var lastDot = resourceName.LastIndexOf ('.');
+			var resourceNamespace = resourceName.Remove (lastDot, resourceName.Length - lastDot);
+			log.LogMessage (MessageImportance.Low, "Using ResourceNamespace={0}", resourceNamespace);
+
 			var targetClassName = Path.GetFileNameWithoutExtension (resxFile);
 			var builder = new System.Text.StringBuilder();
 			using (var writer = new StringWriter (builder)) {
 				string[] errors = null;
 				CSharpCodeProvider provider = new CSharpCodeProvider();
-				CodeCompileUnit code = StronglyTypedResourceBuilder.Create (resxFile, targetClassName, targetNamespace, targetNamespace, provider, !makePublic, out errors);
+				CodeCompileUnit code = StronglyTypedResourceBuilder.Create (resxFile, targetClassName, targetNamespace, resourceNamespace, provider, !makePublic, out errors);
 				if (errors.Length > 0)
 					foreach (var error in errors)
 						log.LogError ("Error generating from '{0}'. {1}", resxFile, error);
