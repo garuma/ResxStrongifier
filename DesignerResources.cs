@@ -1,25 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.IO;
+using System.Resources.Tools;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.CSharp;
 
 namespace NetFx
 {
-	/// <summary>
-	/// Generates a typed class for the given input .resx files.
-	/// </summary>
-	public static class StringResources
+	public static class DesignerResources
 	{
-		/// <summary>
-		/// Default class name to use if no TargetClassName metadata is provided
-		/// for the input resx files.
-		/// </summary>
-		public const string DefaultClassName = "Strings";
-
-		/// <summary>
-		/// Generates the strong typed resources for the given resx input files.
-		/// </summary>
-		/// <remarks>a remark</remarks>
 		public static string Execute (string language, ITaskItem resx, string rootNamespace, TaskLoggingHelper log)
 		{
 			var resxFile = resx.GetMetadata ("FullPath");
@@ -43,13 +35,20 @@ namespace NetFx
 				log.LogMessage (MessageImportance.Low, "Using provided CustomToolNamespace={0} metadata as TargetNamespace for {1}", targetNamespace, resx.ItemSpec);
 			}
 
-			var targetClassName = resx.GetMetadata ("TargetClassName");
-			if (string.IsNullOrEmpty (targetClassName))
-				targetClassName = DefaultClassName;
+			var targetClassName = Path.GetFileNameWithoutExtension (resxFile);
+			var builder = new System.Text.StringBuilder();
+			using (var writer = new StringWriter (builder)) {
+				string[] errors = null;
+				CSharpCodeProvider provider = new CSharpCodeProvider();
+				CodeCompileUnit code = StronglyTypedResourceBuilder.Create (resxFile, targetClassName, targetNamespace, targetNamespace, provider, !makePublic, out errors);
+				if (errors.Length > 0)
+					foreach (var error in errors)
+						log.LogError ("Error generating from '{0}'. {1}", resxFile, error);
 
-			var rootArea = ResourceFile.Build (resxFile, targetClassName);
-			var generator = Generator.Create (language, targetNamespace, resourcesTypeName, targetClassName, makePublic, rootArea);
-			return generator.TransformText ();
+				provider.GenerateCodeFromCompileUnit (code, writer, new CodeGeneratorOptions ());
+			}
+
+			return builder.ToString ();
 		}
 	}
 }
