@@ -22,7 +22,9 @@
     </Target>
 
     <!-- Compatibility targets with netfx-StringResources -->
-    <Target Name="GenerateStringResources" DependsOnTargets="_CollectResxCode;_GenerateCombinedResources">
+    <!-- We need PrepareResourceNames as we now depend on the 'ManifestResourceName' value it generates -->
+    <!-- This ensures the logic runs when a design time build executes -->
+    <Target Name="GenerateStringResources" DependsOnTargets="PrepareResourceNames;_CollectResxCode;_GenerateCombinedResources">
         <ItemGroup>
             <Compile Include="@(ResxCode->'%(GeneratedOutput)')" />
             <FileWrites Include="@(ResxCode->'%(GeneratedOutput)')" />
